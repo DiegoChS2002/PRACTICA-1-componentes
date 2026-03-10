@@ -1,41 +1,56 @@
 "use client";
 import React, { useState } from 'react';
+import {
+  Carousel,
+  CarouselItem,
+  CarouselControl,
+  CarouselIndicators,
+} from 'reactstrap';
 
 const items = [
-  { src: 'https://picsum.photos/id/10/800/400', caption: 'Imagen 1' },
-  { src: 'https://picsum.photos/id/20/800/400', caption: 'Imagen 2' },
-  { src: 'https://picsum.photos/id/30/800/400', caption: 'Imagen 3' },
-  { src: 'https://picsum.photos/id/40/800/400', caption: 'Imagen 4' }
+  { src: 'https://picsum.photos/id/1025/800/400', altText: 'Elefante', key: 1 },
+  { src: 'https://picsum.photos/id/1024/800/400', altText: 'Abeja', key: 2 },
+  { src: 'https://picsum.photos/id/1064/800/400', altText: 'Oso', key: 3 },
+  { src: 'https://picsum.photos/id/1084/800/400', altText: 'Morsa', key: 4 },
 ];
 
-export default function ComponenteCarrusel() {
-  const [index, setIndex] = useState(0);
+export default function MiCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
 
-  const next = () => setIndex((index + 1) % items.length);
-  const prev = () => setIndex((index - 1 + items.length) % items.length);
+  const next = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(nextIndex);
+  };
+
+  const previous = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
+    setActiveIndex(nextIndex);
+  };
 
   return (
-    <div className="p-3 border rounded bg-light shadow-sm" style={{ maxWidth: '600px' }}>
+    <div className="custom-carousel">
       <style>{`
-        .btn-green { color: #28a745; font-size: 2rem; background: none; border: none; font-weight: bold; }
-        .text-green { color: #28a745 !important; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-        .img-container { position: relative; width: 100%; height: 300px; overflow: hidden; border-radius: 8px; }
-        .img-slide { width: 100%; height: 100%; object-fit: cover; }
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+          filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+        }
+        .carousel-caption h3 {
+          color: #28a745 !important;
+        }
       `}</style>
-
-      <div className="img-container">
-        <img src={items[index].src} alt="carousel" className="img-slide" />
-        <div style={{ position: 'absolute', bottom: '20px', left: '0', right: '0', textAlign: 'center' }}>
-          <h3 className="text-green">{items[index].caption}</h3>
-        </div>
-      </div>
-
-      <div className="controls">
-        <button className="btn-green" onClick={prev}>❮</button>
-        <span className="badge bg-secondary">Imagen {index + 1} de 4</span>
-        <button className="btn-green" onClick={next}>❯</button>
-      </div>
+      <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+        <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={(newIndex) => { if (animating) return; setActiveIndex(newIndex); }} />
+        {items.map((item) => (
+          <CarouselItem onExiting={() => setAnimating(true)} onExited={() => setAnimating(false)} key={item.src}>
+            <img src={item.src} alt={item.altText} className="d-block w-100" style={{ borderRadius: '15px' }} />
+          </CarouselItem>
+        ))}
+        <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
+        <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
+      </Carousel>
     </div>
   );
 }
